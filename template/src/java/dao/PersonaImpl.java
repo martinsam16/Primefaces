@@ -21,10 +21,9 @@ public class PersonaImpl extends Conexion implements ICrud<Persona> {
         try {
             String sql = "INSERT INTO PERSONA (NOMBRE, APELLIDO, DNI, ESTADO) VALUES (?,?,?,'A')";
             PreparedStatement ps = this.conectar().prepareStatement(sql);
-            ps.setInt(1, modelo.getId());
-            ps.setString(2, modelo.getNombre());
-            ps.setString(3, modelo.getApellido());
-            ps.setString(4, modelo.getDni());
+            ps.setString(1, modelo.getNombre());
+            ps.setString(2, modelo.getApellido());
+            ps.setString(3, modelo.getDni());
             ps.executeUpdate();
             ps.close();
         } catch (Exception e) {

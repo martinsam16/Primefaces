@@ -1,2 +1,5 @@
 /template/nbproject/private/
 /template/build/
+/demo_maven/target/
+/conexion_db/target/
+/KanbanTasker/target/
