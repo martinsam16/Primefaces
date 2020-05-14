@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Persona :D</title>
+    </h:head>
+    <h:body>
+
+        <h:form id="frmRegistrarPersona">
+            <p:growl life="5000"/>
+            <h:panelGrid columns="2">
+                <p:outputLabel value="Nombres"/>
+                <p:inputText placeholder="Ingrese nombres" value="#{personaC.persona.NOMPER}" 
+                             required="true" requiredMessage="Pls, ingresa nombres">
+                    <p:keyFilter regEx="/[A-Z_a-z_ñ_á_é_í_ó_ú]/"/>
+                </p:inputText>
+
+                <p:outputLabel value="Apellido Paterno"/>
+                <p:inputText placeholder="Ingrese apellido paterno" value="#{personaC.persona.APEPATPER}" 
+                             required="true" requiredMessage="Pls, ingresa apellido paterno">
+                    <p:keyFilter regEx="/[A-Z_a-z_ñ_á_é_í_ó_ú]/"/>
+                </p:inputText>
+
+                <p:outputLabel value="Apellido Materno"/>
+                <p:inputText placeholder="Ingrese apellido materno" value="#{personaC.persona.APEMATPER}" 
+                             required="true" requiredMessage="Pls, ingresa apellido materno">
+                    <p:keyFilter regEx="/[A-Z_a-z_ñ_á_é_í_ó_ú]/"/>
+                </p:inputText>
+
+                <p:outputLabel value="DNI"/>
+                <p:inputMask placeholder="Ingrese DNI" value="#{personaC.persona.DNIPER}" 
+                             required="true" requiredMessage="Pls, ingresa DNI"
+                             maxlength="8" mask="99999999"/>
+
+                <p:outputLabel value="Celular"/>
+                <p:inputMask placeholder="Ingrese número de celular" value="#{personaC.persona.CELPER}" 
+                             required="true" requiredMessage="Pls, ingresa número de celular"
+                             maxlength="9" mask="999999999"/>
+
+                <p:outputLabel value="Lugar de Procedencia"/>
+                <p:selectOneMenu value="#{personaC.persona.ubigeo.CODUBI}" 
+                                 filter="true" filterMatchMode="contains">
+                    <f:selectItems value="#{ubigeoC.listaUbigeo}" var="ubigeo"
+                                   itemValue="#{ubigeo.CODUBI}" 
+                                   itemLabel="#{ubigeo.DEPUBI}, #{ubigeo.PROVUBI}, #{ubigeo.DISTUBI}"/>
+                </p:selectOneMenu>
+
+                <p:outputLabel value="Fecha de Nacimiento"/>
+                <p:calendar value="#{personaC.persona.FECNACPER}" 
+                            required="true" requiredMessage="Pls, ingresa la fecha de nacimiento."
+                            maxdate="today"
+                            showButtonPanel="true" navigator="true"
+                            readonlyInput="true"  pattern="dd/MM/yyyy">
+                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                </p:calendar>
+
+                <p:outputLabel value="Sexo"/>
+                <p:selectOneRadio value="#{personaC.persona.GENPER}"
+                                  required="true" requiredMessage="Pls, ingresa sexo"
+                                  unselectable="false" >
+                    <f:selectItem itemLabel="Masculino" itemValue="M"/>
+                    <f:selectItem itemLabel="Femenino" itemValue="F" />
+                </p:selectOneRadio>
+            </h:panelGrid>
+            <p:commandButton id="btnGuardar" value="GUARDAR" actionListener="#{personaC.registrar()}"
+                             update="frmRegistrarPersona :frmListaPersona"
+                             oncomplete="PF('wvDtTblPersona').filter();"/>
+            <p:blockUI  block="frmRegistrarPersona" trigger="btnGuardar">
+                Cargando ...
+            </p:blockUI>
+
+        </h:form>
+
+        <h:form id="frmListaPersona">
+            <p:growl life="5000"/>
+            <p:dataTable id="dtTblPersona" widgetVar="wvDtTblPersona"
+                         value="#{personaC.listaPersona}" var="listaPersona" 
+                         reflow="true" rowKey="#{listaPersona.IDPER}"
+                         selectionMode="single" selection="#{personaC.personaSeleccionada}"
+                         rows="10" emptyMessage="No se encontrarón datos." 
+                         filteredValue="#{personaC.listaFiltrada}"
+                         paginator="true" scrollable="false" scrollHeight="500"
+                         rowsPerPageTemplate="5,10,15,20">
+
+                <f:facet name="header">
+                    Personas
+                </f:facet>
+                <p:column style="width:10vh">
+                    <p:rowToggler />
+                </p:column>
+                <p:column headerText="Apellido Paterno" 
+                          sortBy="#{listaPersona.APEPATPER}"                       
+                          filterMatchMode="contains"
+                          filterBy="#{listaPersona.APEPATPER}">
+                    <h:outputText value="#{listaPersona.APEPATPER}"/>
+                </p:column>
+                <p:column headerText="Apellido Materno"
+                          sortBy="#{listaPersona.APEMATPER}"                       
+                          filterMatchMode="contains"
+                          filterBy="#{listaPersona.APEMATPER}" >
+                    <h:outputText value="#{listaPersona.APEMATPER}"/>
+                </p:column>            
+                <p:column headerText="Nombres" 
+                          sortBy="#{listaPersona.NOMPER}"                       
+                          filterMatchMode="contains"
+                          filterBy="#{listaPersona.NOMPER}">
+                    <h:outputText value="#{listaPersona.NOMPER}" style="text-transform: capitalize"/>
+                </p:column>
+                <p:column headerText="DNI"
+                          sortBy="#{listaPersona.DNIPER}"                       
+                          filterMatchMode="contains"
+                          filterBy="#{listaPersona.DNIPER}">
+                    <h:outputText value="#{listaPersona.DNIPER}"/>
+                </p:column>
+                <p:column headerText="Ubicación" filterBy="#{listaPersona.ubigeo.DEPUBI}, 
+                          #{listaPersona.ubigeo.PROVUBI}, 
+                          #{listaPersona.ubigeo.DISTUBI}"
+                          filterMatchMode="contains">
+                    <h:outputText value="#{listaPersona.ubigeo.DEPUBI}, 
+                                  #{listaPersona.ubigeo.PROVUBI}, 
+                                  #{listaPersona.ubigeo.DISTUBI}"/>
+                </p:column>
+                <p:column headerText="Celular"  
+                          sortBy="#{listaPersona.CELPER}">
+                    <h:outputText value="#{listaPersona.CELPER}"/>
+                </p:column>
+                <p:rowExpansion>
+                    <p:panelGrid  columns="2" columnClasses="label,value">
+                        <h:outputText value="Sexo" style="font-weight: bold"/>
+                        <h:outputText value="#{listaPersona.GENPER eq 'M' ? 'Masculino' : 'Femenino' }" />
+
+                        <h:outputText value="Fecha de Nacimiento" style="font-weight: bold"/>
+                        <h:outputText value="#{listaPersona.FECNACPER}">
+                            <f:convertDateTime pattern="dd/MMM/yyyy" />
+                        </h:outputText>
+                    </p:panelGrid>
+                </p:rowExpansion>
+
+            </p:dataTable>
+            <p:contextMenu for="dtTblPersona">
+                <p:menuitem value="Modificar" icon="ui-icon-pencil"
+                            oncomplete="PF('wdlgDatosPersona').show();" update=":frmModificarPersona"/>
+                <p:menuitem id="btnEliminar" value="Eliminar" actionListener="#{personaC.eliminar()}" update="frmListaPersona"
+                            oncomplete="PF('wvDtTblPersona').filter();"
+                            icon="ui-icon-circle-close"/>
+
+            </p:contextMenu>
+            <p:blockUI  block="dtTblPersona" trigger="btnEliminar">
+                Cargando ...
+            </p:blockUI>
+        </h:form>
+
+        <p:dialog id="dlgDatosPersona" widgetVar="wdlgDatosPersona" blockScroll="true" modal="true" resizable="false"
+                  header="Datos de la Persona" closeOnEscape="true">
+            <h:form id="frmModificarPersona">
+                <p:growl life="5000"/>
+                <h:panelGrid columns="2">
+                    <p:outputLabel value="Nombres"/>
+                    <p:inputText placeholder="Ingrese nombres" value="#{personaC.personaSeleccionada.NOMPER}" 
+                                 required="true" requiredMessage="Pls, ingresa nombres">
+                        <p:keyFilter regEx="/[A-Z_a-z_ñ_á_é_í_ó_ú]/"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="Apellido Paterno"/>
+                    <p:inputText placeholder="Ingrese apellido paterno" value="#{personaC.personaSeleccionada.APEPATPER}" 
+                                 required="true" requiredMessage="Pls, ingresa apellido paterno">
+                        <p:keyFilter regEx="/[A-Z_a-z_ñ_á_é_í_ó_ú]/"/>
+                    </p:inputText>
+
+                    <p:outputLabel value="Apellido Materno"/>
+                    <p:inputText placeholder="Ingrese apellido materno" value="#{personaC.personaSeleccionada.APEMATPER}" 
+                                 required="true" requiredMessage="Pls, ingresa apellido materno">
+                        <p:keyFilter regEx="/[A-Z_a-z_ñ_á_é_í_ó_ú]/"/>
+                    </p:inputText>
+
+
+                    <p:outputLabel value="Celular"/>
+                    <p:inputMask placeholder="Ingrese número de celular" value="#{personaC.personaSeleccionada.CELPER}" 
+                                 required="true" requiredMessage="Pls, ingresa número de celular"
+                                 maxlength="9" mask="999999999"/>
+
+                    <p:outputLabel value="Lugar de Procedencia"/>
+                    <p:selectOneMenu value="#{personaC.personaSeleccionada.ubigeo.CODUBI}" 
+                                     filter="true" filterMatchMode="contains">
+                        <f:selectItems value="#{ubigeoC.listaUbigeo}" var="ubigeo"
+                                       itemValue="#{ubigeo.CODUBI}" 
+                                       itemLabel="#{ubigeo.DEPUBI}, #{ubigeo.PROVUBI}, #{ubigeo.DISTUBI}"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="Fecha de Nacimiento"/>
+                    <p:calendar value="#{personaC.personaSeleccionada.FECNACPER}" 
+                                required="true" requiredMessage="Pls, ingresa la fecha de nacimiento."
+                                maxdate="today"
+                                showButtonPanel="true" navigator="true"
+                                readonlyInput="true"  pattern="dd/MM/yyyy">
+                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                    </p:calendar>
+
+                    <p:outputLabel value="Sexo"/>
+                    <p:selectOneRadio value="#{personaC.personaSeleccionada.GENPER}"
+                                      required="true" requiredMessage="Pls, ingresa sexo"
+                                      unselectable="false" >
+                        <f:selectItem itemLabel="Masculino" itemValue="M"/>
+                        <f:selectItem itemLabel="Femenino" itemValue="F" />
+                    </p:selectOneRadio>
+                </h:panelGrid>
+                <p:commandButton id="btnModificar" value="MODIFICAR" actionListener="#{personaC.editar()}"
+                                 update="frmModificarPersona :frmListaPersona"
+                                 oncomplete="if(!args.validationFailed)PF('wdlgDatosPersona').hide();PF('wvDtTblPersona').filter();">
+                    <p:confirm header="Confirmation" message="¿Quiere Modificar?" icon="ui-icon-alert" />
+                </p:commandButton>
+                <p:blockUI  block="frmModificarPersona" trigger="btnModificar">
+                    Cargando ...
+                </p:blockUI>
+                <p:commandButton value="CANCELAR" immediate="true"
+                                 oncomplete="PF('wdlgDatosPersona').hide();"/>
+
+                <p:confirmDialog global="true">
+                    <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+                </p:confirmDialog>
+            </h:form>
+        </p:dialog>
+
+
+    </h:body>
+</html>
+
