@@ -7,12 +7,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.PostConstruct;
+import javax.el.MethodExpression;
 import javax.faces.application.Application;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.context.FacesContext;
 import modelo.Task;
+import org.primefaces.behavior.ajax.AjaxBehavior;
+import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.primefaces.component.dashboard.Dashboard;
 import org.primefaces.component.panel.Panel;
+import org.primefaces.event.CloseEvent;
 import org.primefaces.event.DashboardReorderEvent;
 import org.primefaces.model.DashboardColumn;
 import org.primefaces.model.DashboardModel;
@@ -27,6 +31,7 @@ public class KanbanC implements Serializable {
     private Dashboard dashboard;
     private TaskImpl dao;
     private Task task = new Task();
+    List<Task> tareas;
 
     public KanbanC() {
         dao = new TaskImpl();
@@ -35,8 +40,8 @@ public class KanbanC implements Serializable {
     @PostConstruct
     public void onInit() {
         try {
-            dao.crear();
-            listar();
+            dao.crearTabla();
+            setearTareasDashboard();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -46,80 +51,98 @@ public class KanbanC implements Serializable {
     public void guardar() throws Exception {
         try {
             dao.registrar(task);
+            System.out.println("Registrado: " + task);
+            setearTareasDashboard();
             task.clear();
-            listar();
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void listar() {
+    public void setearTareasDashboard() {
         try {
 
-            FacesContext fc = FacesContext.getCurrentInstance();
-            Application application = fc.getApplication();
-
-            dashboard = (Dashboard) application.createComponent(fc, "org.primefaces.component.Dashboard", "org.primefaces.component.DashboardRenderer");
+            FacesContext facesContext = FacesContext.getCurrentInstance();
+            Application application = facesContext.getApplication();
+            
+            dashboard = (Dashboard) application
+                    .createComponent(facesContext,
+                            "org.primefaces.component.Dashboard",
+                            "org.primefaces.component.DashboardRenderer");
             dashboard.setId("dashboard");
 
-            DashboardModel model = new DefaultDashboardModel();
-            DashboardColumn backlog = new DefaultDashboardColumn();
-            DashboardColumn toDo = new DefaultDashboardColumn();
-            DashboardColumn inProgress = new DefaultDashboardColumn();
-            DashboardColumn review = new DefaultDashboardColumn();
-            DashboardColumn completed = new DefaultDashboardColumn();
-            model.addColumn(backlog);
-            model.addColumn(toDo);
-            model.addColumn(inProgress);
-            model.addColumn(review);
-            model.addColumn(completed);
-            dashboard.setModel(model);
+            DashboardColumn columnaBacklog = new DefaultDashboardColumn();
+            DashboardColumn columnaToDo = new DefaultDashboardColumn();
+            DashboardColumn columnaInProgress = new DefaultDashboardColumn();
+            DashboardColumn columnaReview = new DefaultDashboardColumn();
+            DashboardColumn columnaCompleted = new DefaultDashboardColumn();
+
+            DashboardModel dashboardModel = new DefaultDashboardModel();
+            dashboardModel.addColumn(columnaBacklog);
+            dashboardModel.addColumn(columnaToDo);
+            dashboardModel.addColumn(columnaInProgress);
+            dashboardModel.addColumn(columnaReview);
+            dashboardModel.addColumn(columnaCompleted);
+            dashboard.setModel(dashboardModel);
+
+            AjaxBehavior eventoAjaxCerrar = TaskService.crearEvento(facesContext);
 
             List<Task> tareas = dao.listar();
-
             for (Task tarea : tareas) {
-                Panel panel = (Panel) application.createComponent(fc, "org.primefaces.component.Panel", "org.primefaces.component.PanelRenderer");
-                panel.setId("id_" + String.valueOf(tarea.getId()));
+                Panel panel = (Panel) application.createComponent(facesContext, "org.primefaces.component.Panel", "org.primefaces.component.PanelRenderer");
+                panel.setId("idPanel_" + tarea.getId());
                 panel.setHeader(tarea.getTitulo());
-//                panel.setClosable(true);
+                panel.setClosable(true);
                 panel.setToggleable(true);
+                panel.setCollapsed(true);
+                panel.addClientBehavior("close", eventoAjaxCerrar);
 
                 dashboard.getChildren().add(panel);
                 switch (tarea.getTipo()) {
                     case "0":
-                        backlog.addWidget(panel.getId());
+                        columnaBacklog.addWidget(panel.getId());
                         break;
                     case "1":
-                        toDo.addWidget(panel.getId());
+                        columnaToDo.addWidget(panel.getId());
                         break;
                     case "2":
-                        inProgress.addWidget(panel.getId());
+                        columnaInProgress.addWidget(panel.getId());
                         break;
                     case "3":
-                        review.addWidget(panel.getId());
+                        columnaReview.addWidget(panel.getId());
                         break;
                     case "4":
-                        completed.addWidget(panel.getId());
+                        columnaCompleted.addWidget(panel.getId());
                         break;
                     default:
                         break;
                 }
-                HtmlOutputText text = new HtmlOutputText();
-                text.setId("t" + panel.getId());
-                text.setValue(tarea.getDescripcion());
+                HtmlOutputText descripcionPanel = new HtmlOutputText();
+                descripcionPanel.setId("idText_" + panel.getId());
+                descripcionPanel.setValue(tarea.getDescripcion());
 
-                panel.getChildren().add(text);
+                panel.getChildren().add(descripcionPanel);
+                
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void handleReorder(DashboardReorderEvent event) throws Exception {
+    public void eventoReordenarPanel(DashboardReorderEvent evento) throws Exception {
         Task t = new Task();
-        t.setId(Integer.valueOf(event.getWidgetId().split("_")[1]));
-        t.setTipo("" + event.getColumnIndex());
+        t.setId(Integer.valueOf(evento.getWidgetId().split("_")[1]));
+        t.setTipo("" + evento.getColumnIndex());
         dao.editar(t);
+        System.out.println("Editado a: " + t);
+    }
+
+    public void eventoCerrarPanel(CloseEvent evento) throws Exception {
+        Task t = new Task();
+        t.setId(Integer.valueOf(evento.getComponent().getId().split("_")[1]));
+        dao.eliminar(t);
+        System.out.println("Eliminado: " + t.getId());
     }
 
     public Dashboard getDashboard() {

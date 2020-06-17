@@ -8,7 +8,7 @@ import modelo.Task;
 
 public class TaskImpl extends Conexion implements ICrud<Task> {
 
-    public void crear() throws Exception {
+    public void crearTabla() throws Exception {
         try {
             this.crearTablas();
         } catch (Exception e) {
@@ -51,7 +51,18 @@ public class TaskImpl extends Conexion implements ICrud<Task> {
 
     @Override
     public void eliminar(Task modelo) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            String sql = "DELETE FROM TASK WHERE id=?";
+            PreparedStatement ps = this.conectar().prepareStatement(sql);
+            ps.setInt(1, modelo.getId());
+            ps.executeUpdate();
+            ps.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            this.desconectar();
+        }
+    
     }
 
     @Override
@@ -79,6 +90,7 @@ public class TaskImpl extends Conexion implements ICrud<Task> {
         } finally {
             this.desconectar();
         }
+        System.out.println(listaTask);
         return listaTask;
     }
 
