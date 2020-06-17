@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Basico</title>
+    </h:head>
+    <h:body>
+        <style type="text/css">
+            .ui-panel, div.ui-state-hover {
+                margin: 10px;
+                width:200px;
+            }
+
+            .ui-dashboard-column {
+                width:220px;
+            }
+        </style>
+        <h:form>
+            <p:commandButton action="index?faces-redirect=true" value="Volver" />
+        </h:form>
+        <br/>
+        <h:form>
+            <p:growl id="msgs" showDetail="true" />
+
+            <p:panelGrid columns="3" style="width: 790px">
+                <p:outputLabel value="To Do"/>
+                <p:outputLabel value="In Progress"/>
+                <p:outputLabel value="Completed"/>
+            </p:panelGrid>
+
+            <p:dashboard id="board" model="#{dashboardC.model}">
+                <p:ajax event="reorder" listener="#{dashboardC.eventoReordenarPanel}" />
+                <p:panel id="id_deporte" header="Deporte" toggleable="true" closable="true">
+                    <p:ajax event="close" listener="#{dashboardC.eventoCerrarPanel}"/>
+                    <h:outputText value="Sports Content" />
+                </p:panel>
+                
+
+
+            </p:dashboard>
+
+            <div style="clear:both" />
+        </h:form>
+    </h:body>
+</html>
+

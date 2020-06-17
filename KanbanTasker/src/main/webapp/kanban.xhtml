@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Kanban</title>
+    </h:head>
+    <h:body>
+        <style type="text/css">
+            .ui-panel, div.ui-state-hover {
+                margin: 10px;
+                width:200px;
+            }
+
+            .ui-dashboard-column {
+                width:220px;
+            }
+        </style>
+        <h:form>
+            <p:commandButton action="index?faces-redirect=true" value="Volver" />
+        </h:form>
+        <br/>
+        
+        <h:form id="task">
+            <p:growl life="1000"/>
+            <p:fieldset legend="Crear tarea" toggleable="true" collapsed="true">
+                <h:panelGrid columns="1">
+                    <p:inputText value="#{kanbanC.task.titulo}" placeholder="Titulo" 
+                                 required="true" requiredMessage="Ingrese un titulo"/>
+                    <p:inputTextarea value="#{kanbanC.task.descripcion}" placeholder="Descripcion" maxlength="500"
+                                     required="true" requiredMessage="Ingrese una descripción"/>
+                    <h:panelGrid columns="2">
+                        <p:commandButton value="Guardar :D" actionListener="#{kanbanC.guardar()}" oncomplete="if(!args.validationFailed)btnActualizar()"
+                                         update="task :taskList:board"/>
+                        <p:remoteCommand name="btnActualizar" value="F" update="task :taskList:board" immediate="true"/>
+                    </h:panelGrid>
+                </h:panelGrid>
+            </p:fieldset>
+        </h:form>
+
+        <br/>
+
+        <p:panelGrid columns="5" style="width: 1190px">
+            <p:outputLabel value="Backlog"/>
+            <p:outputLabel value="To Do"/>
+            <p:outputLabel value="In Progress"/>
+            <p:outputLabel value="Review"/>
+            <p:outputLabel value="Completed"/>
+        </p:panelGrid>
+        <h:form id="taskList">
+            <p:dashboard id="board" binding="#{kanbanC.dashboard}" widgetVar="wBoard">
+                <p:ajax event="reorder" listener="#{kanbanC.eventoReordenarPanel}" />
+
+            </p:dashboard>
+        </h:form>
+    </h:body>
+</html>
+
